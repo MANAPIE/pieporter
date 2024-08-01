@@ -1,0 +1,37 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE generated files
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+*.bak
+*.swp
+*.swo
+*~
+*.log
+*.orig
+*.pid
+*.seed
+*.pid.lock
+*.cache
+*.out
+
+# Database
+*.db
+*.sql
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+venv/
