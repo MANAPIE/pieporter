@@ -35,3 +35,8 @@ Thumbs.db
 *.pyd
 __pycache__/
 venv/
+
+#.env.* without .env.example
+.env
+.env.*
+!.env.example
