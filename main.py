@@ -12,12 +12,16 @@ def google_search():
     GOOGLE_SEARCH_ENGINE_ID = os.environ.get("GOOGLE_SEARCH_ENGINE_ID")
     GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
     SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
+    SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
 
-    print(f"Search \"{SEARCH_QUERY}\" in Google")
-
     query = SEARCH_QUERY
-    query += "-filetype:pdf"
+    query += " -filetype:pdf"
+
+    if SEARCH_RANGE > 0:
+        end_date = datetime.datetime.now()
+        start_date = end_date - datetime.timedelta(days=SEARCH_RANGE)
+        query += f" after:{start_date.strftime('%Y-%m-%d')}"
 
     start_pages = []
     df = pd.DataFrame(columns=["Title", "Link", "Description"])
@@ -25,6 +29,8 @@ def google_search():
 
     for i in range(1, ROW_PER_SEARCH + 10, 10):
         start_pages.append(i)
+
+    print(f"    Search \"{query}\" in Google")
 
     for start_page in start_pages:
         url = (f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_API_KEY}&cx={GOOGLE_SEARCH_ENGINE_ID}"
@@ -49,23 +55,25 @@ def google_search():
         else:
             break
 
+    print(f"    {len(df)} results")
+
     return df
 
 def save_to_csv(df):
     FILE_PREFIX = os.environ.get("FILE_PREFIX") or "pieporter"
 
-    print("Save in CSV")
+    print("    Save in CSV")
     now = datetime.datetime.now()
     df.to_csv(f"result/{FILE_PREFIX}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.csv", index=False)
 
 
 def __init__():
-    start = time.time()
-    print("Start")
+    start = datetime.datetime.now()
+    print(f"Start at {start.strftime('%Y-%m-%d %H:%M:%S')}")
     df = google_search()
     save_to_csv(df)
-    end = time.time()
-    print(f"Done in {end - start}s")
+    end = datetime.datetime.now()
+    print(f"Done in {end - start}")
 
 
 __init__()
