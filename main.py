@@ -1,5 +1,10 @@
 from dotenv import load_dotenv
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 import pandas as pd
+import smtplib
 import os
 import glob
 import requests
@@ -8,14 +13,13 @@ import datetime
 load_dotenv()
 
 
-def google_search():
+def google_search(search_query):
     GOOGLE_SEARCH_ENGINE_ID = os.environ.get("GOOGLE_SEARCH_ENGINE_ID")
     GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-    SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
 
-    query = SEARCH_QUERY
+    query = search_query
     query += " -filetype:pdf"
 
     if SEARCH_RANGE > 0:
@@ -65,7 +69,11 @@ def save_to_csv(df):
 
     print("    Save in CSV")
     now = datetime.datetime.now()
-    df.to_csv(f"result/{FILE_PREFIX}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.csv", index=False)
+
+    filename = f"result/{FILE_PREFIX}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    df.to_csv(filename, index=False)
+
+    return filename
 
 
 def get_recent_result():
@@ -87,14 +95,66 @@ def compare_dataframes(old_df, new_df):
     return new_rows
 
 
+def send_email(subject, body, to_email, attachment_path=None):
+    EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
+    EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+    SMTP_SERVER = os.environ.get("SMTP_SERVER")
+    SMTP_PORT = int(os.environ.get("SMTP_PORT"))
+
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    print("    Send email")
+
+    if attachment_path is not None:
+        attachment = open(attachment_path, "rb")
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(attachment.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(attachment_path)}')
+        msg.attach(part)
+
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(EMAIL_ADDRESS, to_email, text)
+        server.quit()
+        print("    Email sent successfully")
+
+    except Exception as e:
+        print(f"    Failed to send email: {e}")
+
+
+def send_report(search_query, diff, result_file):
+    EMAIL_PREFIX = os.environ.get("EMAIL_PREFIX")
+    EMAIL_TO = os.environ.get("EMAIL_TO")
+
+    subject = EMAIL_PREFIX + f"New search result for {search_query}"
+    body = ""
+    for diff_index, diff_row in diff.iterrows():
+        body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
+
+    send_email(subject, body, EMAIL_TO, result_file)
+
+
 def __init__():
     start = datetime.datetime.now()
     print(f"Start at {start.strftime('%Y-%m-%d %H:%M:%S')}")
-    df = google_search()
 
-    print(compare_dataframes(get_recent_result(), df))
+    SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
 
-    save_to_csv(df)
+    df = google_search(SEARCH_QUERY)
+    diff = compare_dataframes(get_recent_result(), df)
+
+    result_file = save_to_csv(df)
+
+    send_report(SEARCH_QUERY, diff, result_file)
 
     end = datetime.datetime.now()
     print(f"Done in {end - start}")
