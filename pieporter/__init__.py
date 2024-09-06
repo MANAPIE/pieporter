@@ -82,4 +82,4 @@ def search():
 
         result_file = save_to_csv(search_query, df)
 
-        send_report(SEARCH_QUERY, diff, result_file)
+        send_report(search_query, diff, result_file)
