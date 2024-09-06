@@ -38,7 +38,7 @@ def search(search_query, row_per_search):
                     df.loc[start_page + i] = [title, link, description]
 
                     row_count += 1
-                if row_count >= row_per_search:
+                if row_count > row_per_search:
                     break
 
         else:

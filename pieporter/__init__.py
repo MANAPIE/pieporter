@@ -10,20 +10,22 @@ import google_search
 load_dotenv()
 
 
-def save_to_csv(df):
+def save_to_csv(search_query, df):
     FILE_PREFIX = os.environ.get("FILE_PREFIX") or "pieporter"
 
     print("    Save in CSV")
     now = datetime.datetime.now()
 
-    filename = f"result/{FILE_PREFIX}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    filename = f"result/{FILE_PREFIX}_{search_query}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
     df.to_csv(filename, index=False)
 
     return filename
 
 
-def get_recent_result():
-    list_of_files = glob.glob('result/*.csv')
+def get_recent_result(search_query):
+    FILE_PREFIX = os.environ.get("FILE_PREFIX") or "pieporter"
+
+    list_of_files = glob.glob(f'result/{FILE_PREFIX}_{search_query}_*.csv')
     if not list_of_files:
         return None
 
@@ -51,28 +53,33 @@ def send_report(search_query, diff, result_file):
 
     subject = EMAIL_PREFIX + f"New search result for {search_query}"
     body = ""
-    for diff_index, diff_row in diff.iterrows():
-        body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
+
+    if diff is not None:
+        for diff_index, diff_row in diff.iterrows():
+            body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
 
     send_email.send_email(subject, body, EMAIL_TO, result_file)
 
 
 def search():
     SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
+    QUERY_SEPERATOR = os.environ.get("QUERY_SEPERATOR")
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
 
-    query = SEARCH_QUERY
-    query += " -filetype:pdf"
+    search_query_list = SEARCH_QUERY.split(QUERY_SEPERATOR)
+    for search_query in search_query_list:
+        query = search_query
+        query += " -filetype:pdf"
 
-    if SEARCH_RANGE > 0:
-        end_date = datetime.datetime.now()
-        start_date = end_date - datetime.timedelta(days=SEARCH_RANGE)
-        query += f" after:{start_date.strftime('%Y-%m-%d')}"
+        if SEARCH_RANGE > 0:
+            end_date = datetime.datetime.now()
+            start_date = end_date - datetime.timedelta(days=SEARCH_RANGE)
+            query += f" after:{start_date.strftime('%Y-%m-%d')}"
 
-    df = google_search.search(SEARCH_QUERY, ROW_PER_SEARCH)
-    diff = compare_dataframes(get_recent_result(), df)
+        df = google_search.search(query, ROW_PER_SEARCH)
+        diff = compare_dataframes(get_recent_result(search_query), df)
 
-    result_file = save_to_csv(df)
+        result_file = save_to_csv(search_query, df)
 
-    send_report(SEARCH_QUERY, diff, result_file)
+        send_report(SEARCH_QUERY, diff, result_file)
