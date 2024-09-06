@@ -36,7 +36,7 @@ def get_recent_result(search_query):
 
 def compare_dataframes(old_df, new_df):
     if old_df is None:
-        return None
+        return new_df
 
     print("    Compare with recent results")
     new_rows = new_df[~new_df.apply(tuple, 1).isin(old_df.apply(tuple, 1))]
