@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 
-def send_email(subject, body, to_email, attachment_path=None):
+def send_email(subject, body, to_email, attachment_path_list=None):
     EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
     EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
     SMTP_SERVER = os.environ.get("SMTP_SERVER")
@@ -28,14 +28,15 @@ def send_email(subject, body, to_email, attachment_path=None):
 
     print("    Send email")
 
-    if attachment_path is not None:
-        attachment = open(attachment_path, "rb")
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read())
-        encoders.encode_base64(part)
-        filename = os.path.basename(attachment_path)
-        part.add_header('Content-Disposition', 'attachment', filename=filename)
-        msg.attach(part)
+    if attachment_path_list is not None:
+        for attachment_path in attachment_path_list:
+            attachment = open(attachment_path, "rb")
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            filename = os.path.basename(attachment_path)
+            part.add_header('Content-Disposition', 'attachment', filename=filename)
+            msg.attach(part)
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)

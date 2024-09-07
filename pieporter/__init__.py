@@ -58,7 +58,29 @@ def send_report(search_query, diff, result_file):
         for diff_index, diff_row in diff.iterrows():
             body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
 
-    send_email.send_email(subject, body, EMAIL_TO, result_file)
+    send_email.send_email(subject, body, EMAIL_TO, [result_file])
+
+def send_reports_at_once(results_list):
+    EMAIL_PREFIX = os.environ.get("EMAIL_PREFIX")
+    EMAIL_TO = os.environ.get("EMAIL_TO")
+
+    if EMAIL_TO is None:
+        print("    No email address to send")
+        return
+
+    subject = EMAIL_PREFIX + f"New search results for {len(results_list)} queries"
+    body = ""
+
+    for result in results_list:
+        body += f"Search query: {result['query']}\n\n"
+        if result['diff'] is not None:
+            for diff_index, diff_row in result['diff'].iterrows():
+                body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
+        body += "\n------------------------------------------------\n"
+
+    attachment_path_list = [result['file'] for result in results_list]
+
+    send_email.send_email(subject, body, EMAIL_TO, attachment_path_list)
 
 
 def search():
@@ -67,8 +89,11 @@ def search():
     EXCLUDE_SITE = os.environ.get("EXCLUDE_SITE")
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
+    SEND_REPORT_EACH = bool(os.environ.get("SEND_REPORT_EACH"))
 
     search_query_list = SEARCH_QUERY.split(QUERY_SEPERATOR)
+    results_list = []
+
     for search_query in search_query_list:
         query = search_query
         query += " -filetype:pdf"
@@ -88,4 +113,10 @@ def search():
 
         result_file = save_to_csv(search_query, df)
 
-        send_report(search_query, diff, result_file)
+        if SEND_REPORT_EACH:
+            send_report(search_query, diff, result_file)
+        else:
+            results_list.append({"query": search_query, "diff": diff, "file": result_file})
+
+    if not SEND_REPORT_EACH:
+        send_reports_at_once(results_list)
