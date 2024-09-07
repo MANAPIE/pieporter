@@ -64,6 +64,7 @@ def send_report(search_query, diff, result_file):
 def search():
     SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
     QUERY_SEPERATOR = os.environ.get("QUERY_SEPERATOR")
+    EXCLUDE_SITE = os.environ.get("EXCLUDE_SITE")
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
 
@@ -71,6 +72,11 @@ def search():
     for search_query in search_query_list:
         query = search_query
         query += " -filetype:pdf"
+
+        if EXCLUDE_SITE:
+            exclude_site_list = EXCLUDE_SITE.split(QUERY_SEPERATOR)
+            for exclude_site in exclude_site_list:
+                query += f" -site:{exclude_site}"
 
         if SEARCH_RANGE > 0:
             end_date = datetime.datetime.now()
