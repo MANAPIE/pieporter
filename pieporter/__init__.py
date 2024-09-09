@@ -7,6 +7,8 @@ import datetime
 import send_email
 import google_search
 
+from .templates import report_all
+
 load_dotenv()
 
 
@@ -52,13 +54,17 @@ def send_report(search_query, diff, result_file):
         return
 
     subject = EMAIL_PREFIX + f"New search result for {search_query}"
+
     body = ""
 
     if diff is not None:
         for diff_index, diff_row in diff.iterrows():
             body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
 
-    send_email.send_email(subject, body, EMAIL_TO, [result_file])
+    body = templates.report_one(diff)
+
+    send_email.send_email(subject, body, EMAIL_TO, "html", [result_file])
+
 
 def send_reports_at_once(results_list):
     EMAIL_PREFIX = os.environ.get("EMAIL_PREFIX")
@@ -71,16 +77,11 @@ def send_reports_at_once(results_list):
     subject = EMAIL_PREFIX + f"New search results for {len(results_list)} queries"
     body = ""
 
-    for result in results_list:
-        body += f"Search query: {result['query']}\n\n"
-        if result['diff'] is not None:
-            for diff_index, diff_row in result['diff'].iterrows():
-                body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
-        body += "\n------------------------------------------------\n"
+    body = report_all(results_list)
 
     attachment_path_list = [result['file'] for result in results_list]
 
-    send_email.send_email(subject, body, EMAIL_TO, attachment_path_list)
+    send_email.send_email(subject, body, EMAIL_TO, "html", attachment_path_list)
 
 
 def search():

@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 
-def send_email(subject, body, to_email, attachment_path_list=None):
+def send_email(subject, body, to_email, body_type="plain", attachment_path_list=None):
     EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
     EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
     SMTP_SERVER = os.environ.get("SMTP_SERVER")
@@ -24,7 +24,7 @@ def send_email(subject, body, to_email, attachment_path_list=None):
     msg['To'] = to_email
     msg['Subject'] = subject
 
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body, body_type))
 
     print("    Send email")
 
