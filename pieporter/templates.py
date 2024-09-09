@@ -20,16 +20,15 @@ def stylesheet():
         
             .pieporter__for {
                 color: #0D47A1;
-                font-size: 1.2em;
+                font-size: 1.1em;
                 padding: 5px 0 5px 12px;
+                margin-top: 20px;
             }
         
             table.pieporter__results {
                 background: #FFFFFF;
                 border-collapse: collapse;
                 width: 100%;
-                border-top: 10px solid #FFFFFF;
-                margin-bottom: 60px;
                 border-radius: 8px;
             }
     
@@ -37,6 +36,10 @@ def stylesheet():
                 text-align: left;
                 padding: 10px 12px 5px;
                 font-weight: bold;
+            }
+        
+            table.pieporter__results tr:first-child td.pieporter__results_title {
+                padding-top: 15px;
             }
     
             td.pieporter__results_title a {
@@ -59,22 +62,68 @@ def stylesheet():
                 margin-bottom: 10px;
                 border-radius: 5px;
             }
+            
+            .pieporter__results_gap {
+                background: #2196F3;
+                width: 10px;
+                height: 10px;
+                border-radius: 10px;
+                margin: 60px auto;
+            }
+            
+            .pieporter__footer p {
+                font-size: 0.8em;
+                color: #999999;
+                text-align: center;
+                padding-bottom: 40px;
+            }
+            
+            .pieporter__footer p a {
+                text-decoration: none;
+                color: #2196F3;
+            }
+            
         </style>
     """
 
 
-def report_one(diff):
-    body = """
+def template_start():
+    return """
         <html>
         <head>
     """
-    body += stylesheet()
-    body += """
+
+
+def template_end():
+    return """
+        </body>
+        </html>
+    """
+
+
+def header():
+    return """
         </head>
         <body>
         <div class="pieporter__container">
             <div class="pieporter__body">
     """
+
+
+def footer():
+    return """
+            </div>
+            <div class="pieporter__footer">
+                <p>Powered by <a href="https://github.com/MANAPIE/pieporter" target="_blank">pieporter</a></p>
+            </div>
+        </div>
+    """
+
+
+def report_one(diff):
+    body = template_start()
+    body += stylesheet()
+    body += header()
 
     body += """
             <table class="pieporter__results">
@@ -103,27 +152,20 @@ def report_one(diff):
     """
 
     body += """
+            <div class="pieporter__results_gap">
             </div>
-        </div>
-        </body>
-        </html>
-    """
+        """
+
+    body += footer()
+    body = template_end()
 
     return body
 
 
 def report_all(results_list):
-    body = """
-        <html>
-        <head>
-    """
+    body = template_start()
     body += stylesheet()
-    body += """
-        </head>
-        <body>
-        <div class="pieporter__container">
-            <div class="pieporter__body">
-    """
+    body += header()
 
     for result in results_list:
         body += f"""
@@ -155,9 +197,13 @@ def report_all(results_list):
             </table>
         """
 
-    body += """
+        body += """
+            <div class="pieporter__results_gap">
             </div>
-        </div>
+        """
+
+    body += footer()
+    body += """
         </body>
         </html>
     """
