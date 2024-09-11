@@ -32,6 +32,12 @@ def stylesheet():
                 border-radius: 8px;
             }
     
+            td.pieporter__results_empty {
+                text-align: left;
+                padding: 10px 12px;
+                color: #999999;
+            }
+    
             td.pieporter__results_title {
                 text-align: left;
                 padding: 10px 12px 5px;
@@ -130,7 +136,7 @@ def report_one(diff):
             <tbody>
         """
 
-    if diff is not None:
+    if diff is not None and not diff.empty:
         for diff_index, diff_row in diff.iterrows():
             body += f"""
                 <tr>
@@ -145,6 +151,15 @@ def report_one(diff):
                     </td>
                 </tr>
             """
+
+    else:
+        body += """
+            <tr>
+                <td class="pieporter__results_empty">
+                    No new results
+                </td>
+            </tr>
+        """
 
     body += """
         </tbody>
@@ -176,7 +191,7 @@ def report_all(results_list):
             <tbody>
         """
 
-        if result['diff'] is not None:
+        if result['diff'] is not None and not result['diff'].empty:
             for diff_index, diff_row in result['diff'].iterrows():
                 body += f"""
                     <tr>
@@ -191,6 +206,15 @@ def report_all(results_list):
                         </td>
                     </tr>
                 """
+
+        else:
+            body += """
+                <tr>
+                    <td class="pieporter__results_empty">
+                        No new results
+                    </td>
+                </tr>
+            """
 
         body += """
             </tbody>
