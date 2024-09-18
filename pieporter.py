@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import sys
 import datetime
 
 import pieporter
@@ -15,6 +16,8 @@ def main():
     end = datetime.datetime.now()
     print(f"Done in {end - start}")
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
