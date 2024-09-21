@@ -88,4 +88,10 @@ If the immediate previous search result exists, report contains only new items.<
 
 
 
+### ...And its result
+
+![pieporter_example](https://github.com/user-attachments/assets/10f1644b-b987-4055-a880-ae2d8110b7f5)
+
+Reports are mobile-friendly and also dark-mode-friendly.
+
 
