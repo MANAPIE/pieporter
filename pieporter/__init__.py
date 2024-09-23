@@ -89,7 +89,7 @@ def search():
     QUERY_SEPERATOR = os.environ.get("QUERY_SEPERATOR")
     EXCLUDE_SITE = os.environ.get("EXCLUDE_SITE")
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
-    ROW_PER_SEARCH = int(os.environ.get("ROW_PER_SEARCH"))
+    ROW_PER_SEARCH = min([int(os.environ.get("ROW_PER_SEARCH") or 10), 100])
     SEND_REPORT_EACH = bool(os.environ.get("SEND_REPORT_EACH"))
 
     search_query_list = SEARCH_QUERY.split(QUERY_SEPERATOR)

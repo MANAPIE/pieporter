@@ -16,7 +16,7 @@ def search(search_query, row_per_search):
     df = pd.DataFrame(columns=["Title", "Link", "Description"])
     row_count = 0
 
-    for i in range(1, row_per_search + 10, 10):
+    for i in range(1, row_per_search + 1, 10):
         start_pages.append(i)
 
     print(f"    Search \"{query}\" in Google")
@@ -38,7 +38,7 @@ def search(search_query, row_per_search):
                     df.loc[start_page + i] = [title, link, description]
 
                     row_count += 1
-                if row_count > row_per_search:
+                if row_count >= row_per_search:
                     break
 
         else:

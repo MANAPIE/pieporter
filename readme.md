@@ -40,7 +40,7 @@ If the immediate previous search result exists, report contains only new items.<
 - ```GOOGLE_SEARCH_ENGINE_ID```: Google Search Engine ID<br> https://programmablesearchengine.google.com/
 - ```GOOGLE_API_KEY```: GCP Custom Search Engine allowed API KEY<br> https://console.cloud.google.com/apis/credentials
 - ```ROW_PER_SEARCH```: Number of search results per search
-  - Default value is 10
+  - Default value is 10, maximum value is 100
 > Google Search API may incur charges. Be careful.
 
 ### Pie-Porter Settings for ```pieporter```
