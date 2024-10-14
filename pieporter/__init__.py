@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from difflib import SequenceMatcher
 import pandas as pd
 import os
 import glob
@@ -37,12 +38,30 @@ def get_recent_result(search_query):
 
 
 def compare_dataframes(old_df, new_df):
+    SIMILARITY_THRESHOLD = float(os.environ.get("SIMILARITY_THRESHOLD") or 0.9)
+
     if old_df is None:
         return new_df
 
     print("    Compare with recent results")
-    new_rows = new_df[~new_df.apply(tuple, 1).isin(old_df.apply(tuple, 1))]
-    return new_rows
+
+    def similarity(a, b):
+        return SequenceMatcher(None, a, b).ratio()
+
+    new_rows = []
+
+    for new_index, new_row in new_df.iterrows():
+        is_new = True
+        for old_index, old_row in old_df.iterrows():
+            title_similarity = similarity(new_row['Title'], old_row['Title'])
+            description_similarity = similarity(new_row['Description'], old_row['Description'])
+            if title_similarity > SIMILARITY_THRESHOLD or description_similarity > SIMILARITY_THRESHOLD:
+                is_new = False
+                break
+        if is_new:
+            new_rows.append(new_row)
+
+    return pd.DataFrame(new_rows)
 
 
 def send_report(search_query, diff, result_file):

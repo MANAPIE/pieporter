@@ -57,6 +57,8 @@ If the immediate previous search result exists, report contains only new items.<
 - ```EMAIL_PREFIX```: Prefix for the email subject
 - ```EMAIL_TO```: Receiver's email address
 - ```SEND_REPORT_EACH```: If there is a value(means not false), send separate emails for each keyword.
+- ```SIMILARITY_THRESHOLD```: If the similarity between the previous search result and the current search result is higher than this value, the current search result is considered as the same as the previous search result.
+    - Default value is 0.9
 
 
 ---
@@ -85,6 +87,7 @@ If the immediate previous search result exists, report contains only new items.<
     EMAIL_PREFIX='[pieporter] '
     EMAIL_TO=@@@
     SEND_REPORT_EACH=
+    SIMILARITY_THRESHOLD=0.9
 
 
 
