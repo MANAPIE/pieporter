@@ -54,6 +54,13 @@ def stylesheet():
                 word-break: break-all;
                 font-size: 0.8em;
             }
+
+            td.pieporter__results_title mark {
+                background-color: #FFEB3B;
+                color: #111111;
+                padding: 0 2px;
+                border-radius: 2px;
+            }
     
             td.pieporter__results_description {
                 padding: 0 8px;
@@ -67,6 +74,13 @@ def stylesheet():
                 padding: 5px 8px;
                 margin-bottom: 10px;
                 border-radius: 5px;
+            }
+
+            td.pieporter__results_description mark {
+                background-color: #FFEB3B;
+                color: #111111;
+                padding: 0 2px;
+                border-radius: 2px;
             }
             
             .pieporter__results_gap {

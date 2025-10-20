@@ -128,7 +128,7 @@ def search():
             start_date = end_date - datetime.timedelta(days=SEARCH_RANGE)
             query += f" after:{start_date.strftime('%Y-%m-%d')}"
 
-        df = google_search.search(query, ROW_PER_SEARCH)
+        df = google_search.search(query, ROW_PER_SEARCH, search_query)
         diff = compare_dataframes(get_recent_result(search_query), df)
 
         result_file = save_to_csv(search_query, df)

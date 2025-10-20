@@ -2,15 +2,40 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 import requests
+import re
 
 load_dotenv()
 
 
-def search(search_query, row_per_search):
+def extract_keywords(search_query):
+    query = search_query.replace(' AND ', ' ').replace(' OR ', ' ')
+    query = re.sub(r'[^\w\s가-힣]', ' ', query)
+    keywords = [kw.strip() for kw in query.split() if kw.strip()]
+
+    return keywords
+
+
+def highlight_keywords(text, keywords):
+    if not text or not keywords:
+        return text
+
+    result = text
+    for keyword in keywords:
+        pattern = re.compile(re.escape(keyword), re.IGNORECASE)
+        result = pattern.sub(lambda m: f'<mark>{m.group()}</mark>', result)
+
+    return result
+
+
+def search(search_query, row_per_search, original_search_query=None):
     GOOGLE_SEARCH_ENGINE_ID = os.environ.get("GOOGLE_SEARCH_ENGINE_ID")
     GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
     query = search_query
+
+    keywords = []
+    if original_search_query:
+        keywords = extract_keywords(original_search_query)
 
     start_pages = []
     df = pd.DataFrame(columns=["Title", "Link", "Description"])
@@ -34,6 +59,12 @@ def search(search_query, row_per_search):
                     title = search_item.get("title")
                     link = search_item.get("link")
                     description = search_item.get("snippet")
+
+                    if keywords and title:
+                        title = highlight_keywords(title, keywords)
+
+                    if keywords and description:
+                        description = highlight_keywords(description, keywords)
 
                     df.loc[start_page + i] = [title, link, description]
 
