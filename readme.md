@@ -4,7 +4,8 @@
 Search through the search engine,<br>
 And report the results via email with a CSV file.<br>
 
-If the immediate previous search result exists, report contains only new items.<br>
+If previous search results exist, report contains only new items.<br>
+You can configure how many recent results to compare against.<br>
 (By the way, CSV file has all results.)
 
 ---
@@ -59,6 +60,8 @@ If the immediate previous search result exists, report contains only new items.<
 - ```SEND_REPORT_EACH```: If there is a value(means not false), send separate emails for each keyword.
 - ```SIMILARITY_THRESHOLD```: If the similarity between the previous search result and the current search result is higher than this value, the current search result is considered as the same as the previous search result.
     - Default value is 0.9
+- ```COMPARE_RECENT_N```: Number of recent search results to compare with current results
+    - Default value is 1
 
 
 ---
@@ -88,6 +91,7 @@ If the immediate previous search result exists, report contains only new items.<
     EMAIL_TO=@@@
     SEND_REPORT_EACH=
     SIMILARITY_THRESHOLD=0.9
+    COMPARE_RECENT_N=1
 
 
 

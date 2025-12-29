@@ -25,15 +25,18 @@ def save_to_csv(search_query, df):
     return filename
 
 
-def get_recent_result(search_query):
+def get_recent_result(search_query, n=1):
     FILE_PREFIX = os.environ.get("FILE_PREFIX") or "pieporter"
 
     list_of_files = glob.glob(f'result/{FILE_PREFIX}_{search_query}_*.csv')
     if not list_of_files:
         return None
 
-    latest_file = max(list_of_files, key=os.path.getctime)
-    df = pd.read_csv(latest_file)
+    sorted_files = sorted(list_of_files, key=os.path.getctime, reverse=True)
+    recent_files = sorted_files[:n]
+
+    df_list = [pd.read_csv(file) for file in recent_files]
+    df = pd.concat(df_list, ignore_index=True)
     return df
 
 
@@ -110,6 +113,7 @@ def search():
     SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
     ROW_PER_SEARCH = min([int(os.environ.get("ROW_PER_SEARCH") or 10), 100])
     SEND_REPORT_EACH = bool(os.environ.get("SEND_REPORT_EACH"))
+    COMPARE_RECENT_N = int(os.environ.get("COMPARE_RECENT_N") or 1)
 
     search_query_list = SEARCH_QUERY.split(QUERY_SEPERATOR)
     results_list = []
@@ -129,7 +133,7 @@ def search():
             query += f" after:{start_date.strftime('%Y-%m-%d')}"
 
         df = google_search.search(query, ROW_PER_SEARCH, search_query)
-        diff = compare_dataframes(get_recent_result(search_query), df)
+        diff = compare_dataframes(get_recent_result(search_query, COMPARE_RECENT_N), df)
 
         result_file = save_to_csv(search_query, df)
 
