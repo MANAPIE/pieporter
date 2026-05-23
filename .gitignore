@@ -24,6 +24,7 @@ Thumbs.db
 *.pid.lock
 *.cache
 *.out
+.history
 
 # Database
 *.db

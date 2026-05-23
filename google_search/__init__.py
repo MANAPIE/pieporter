@@ -1,10 +1,30 @@
 from dotenv import load_dotenv
+from collections import deque
 import pandas as pd
 import os
 import requests
 import re
+import time
 
 load_dotenv()
+
+RATE_LIMIT_PER_MINUTE = 90
+_request_times = deque()
+
+
+def throttle():
+    now = time.monotonic()
+    while _request_times and now - _request_times[0] >= 60:
+        _request_times.popleft()
+    if len(_request_times) >= RATE_LIMIT_PER_MINUTE:
+        wait = 60 - (now - _request_times[0])
+        if wait > 0:
+            print(f"    Rate limit: sleeping {wait:.1f}s")
+            time.sleep(wait)
+        now = time.monotonic()
+        while _request_times and now - _request_times[0] >= 60:
+            _request_times.popleft()
+    _request_times.append(time.monotonic())
 
 
 def extract_keywords(search_query):
@@ -50,7 +70,14 @@ def search(search_query, row_per_search, original_search_query=None):
         url = (f"https://www.googleapis.com/customsearch/v1?key={GOOGLE_API_KEY}&cx={GOOGLE_SEARCH_ENGINE_ID}"
                f"&q={query}&start={start_page}")
 
+        throttle()
         data = requests.get(url).json()
+
+        if "error" in data:
+            error = data["error"]
+            print(f"    API error {error.get('code')}: {error.get('message')}")
+            break
+
         search_items = data.get("items")
 
         if search_items is not None:
