@@ -60,6 +60,15 @@ def search(search_query, row_per_search, original_search_query=None):
                     link = search_item.get("link")
                     description = search_item.get("snippet")
 
+                    if len(keywords) >= 2:
+                        matched = sum(
+                            1 for kw in keywords
+                            if (title and re.search(re.escape(kw), title, re.IGNORECASE))
+                            or (description and re.search(re.escape(kw), description, re.IGNORECASE))
+                        )
+                        if matched < 2:
+                            continue
+
                     if keywords and title:
                         title = highlight_keywords(title, keywords)
 
