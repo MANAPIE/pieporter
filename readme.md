@@ -62,6 +62,9 @@ You can configure how many recent results to compare against.<br>
     - Default value is 0.9
 - ```COMPARE_RECENT_N```: Number of recent search results to compare with current results
     - Default value is 1
+- ```HIDE_EMPTY_RESULTS```: If there is a value(means not false), hide queries with no new results from the report.
+    - The CSV file is still saved for future comparison, but the query is omitted from the email body and attachments.
+    - When every query has no new results, no email is sent.
 
 
 ---
@@ -92,6 +95,7 @@ You can configure how many recent results to compare against.<br>
     SEND_REPORT_EACH=
     SIMILARITY_THRESHOLD=0.9
     COMPARE_RECENT_N=1
+    HIDE_EMPTY_RESULTS=
 
 
 

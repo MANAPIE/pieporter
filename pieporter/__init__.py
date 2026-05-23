@@ -114,6 +114,7 @@ def search():
     ROW_PER_SEARCH = min([int(os.environ.get("ROW_PER_SEARCH") or 10), 100])
     SEND_REPORT_EACH = bool(os.environ.get("SEND_REPORT_EACH"))
     COMPARE_RECENT_N = int(os.environ.get("COMPARE_RECENT_N") or 1)
+    HIDE_EMPTY_RESULTS = bool(os.environ.get("HIDE_EMPTY_RESULTS"))
 
     search_query_list = SEARCH_QUERY.split(QUERY_SEPERATOR)
     results_list = []
@@ -137,10 +138,17 @@ def search():
 
         result_file = save_to_csv(search_query, df)
 
+        if HIDE_EMPTY_RESULTS and (diff is None or diff.empty):
+            print("    Hide empty result from report")
+            continue
+
         if SEND_REPORT_EACH:
             send_report(search_query, diff, result_file)
         else:
             results_list.append({"query": search_query, "diff": diff, "file": result_file})
 
     if not SEND_REPORT_EACH:
+        if not results_list:
+            print("    No results to report")
+            return
         send_reports_at_once(results_list)
