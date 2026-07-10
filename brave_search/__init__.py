@@ -7,6 +7,7 @@ import re
 import time
 import datetime
 import fnmatch
+import html
 
 load_dotenv()
 
@@ -32,7 +33,23 @@ def extract_keywords(search_query):
     query = re.sub(r'[^\w\s가-힣]', ' ', query)
     keywords = [kw.strip() for kw in query.split() if kw.strip()]
 
-    return keywords
+    seen = set()
+    unique_keywords = []
+    for keyword in keywords:
+        if keyword.lower() not in seen:
+            seen.add(keyword.lower())
+            unique_keywords.append(keyword)
+
+    return unique_keywords
+
+
+def clean_text(text):
+    if not text:
+        return text
+
+    text = re.sub(r'</?(?:strong|b|em|i|wbr)\s*/?>', '', text, flags=re.IGNORECASE)
+
+    return html.unescape(text)
 
 
 def highlight_keywords(text, keywords):
@@ -148,6 +165,11 @@ def search(search_query, row_per_search, original_search_query=None):
     exclude_patterns = get_exclude_patterns()
     freshness = build_freshness()
 
+    for pattern in exclude_patterns:
+        domain = pattern[2:] if pattern.startswith("*.") else pattern
+        if "*" not in domain:
+            query += f" -site:{domain}"
+
     page_count = min((row_per_search + COUNT_PER_PAGE - 1) // COUNT_PER_PAGE, OFFSET_MAX + 1)
 
     df = pd.DataFrame(columns=["Title", "Link", "Description"])
@@ -176,9 +198,9 @@ def search(search_query, row_per_search, original_search_query=None):
 
         for search_item in search_items:
             if search_item is not None:
-                title = search_item.get("title")
+                title = clean_text(search_item.get("title"))
                 link = search_item.get("url")
-                description = search_item.get("description")
+                description = clean_text(search_item.get("description"))
 
                 if not link or link in seen_links:
                     continue
