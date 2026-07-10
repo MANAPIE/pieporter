@@ -32,7 +32,14 @@ def extract_keywords(search_query):
     query = re.sub(r'[^\w\s가-힣]', ' ', query)
     keywords = [kw.strip() for kw in query.split() if kw.strip()]
 
-    return keywords
+    seen = set()
+    unique_keywords = []
+    for keyword in keywords:
+        if keyword.lower() not in seen:
+            seen.add(keyword.lower())
+            unique_keywords.append(keyword)
+
+    return unique_keywords
 
 
 def highlight_keywords(text, keywords):
