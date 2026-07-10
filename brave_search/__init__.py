@@ -7,6 +7,7 @@ import re
 import time
 import datetime
 import fnmatch
+import html
 
 load_dotenv()
 
@@ -40,6 +41,15 @@ def extract_keywords(search_query):
             unique_keywords.append(keyword)
 
     return unique_keywords
+
+
+def clean_text(text):
+    if not text:
+        return text
+
+    text = re.sub(r'</?(?:strong|b|em|i|wbr)\s*/?>', '', text, flags=re.IGNORECASE)
+
+    return html.unescape(text)
 
 
 def highlight_keywords(text, keywords):
@@ -188,9 +198,9 @@ def search(search_query, row_per_search, original_search_query=None):
 
         for search_item in search_items:
             if search_item is not None:
-                title = search_item.get("title")
+                title = clean_text(search_item.get("title"))
                 link = search_item.get("url")
-                description = search_item.get("description")
+                description = clean_text(search_item.get("description"))
 
                 if not link or link in seen_links:
                     continue
