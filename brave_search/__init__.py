@@ -148,6 +148,11 @@ def search(search_query, row_per_search, original_search_query=None):
     exclude_patterns = get_exclude_patterns()
     freshness = build_freshness()
 
+    for pattern in exclude_patterns:
+        domain = pattern[2:] if pattern.startswith("*.") else pattern
+        if "*" not in domain:
+            query += f" -site:{domain}"
+
     page_count = min((row_per_search + COUNT_PER_PAGE - 1) // COUNT_PER_PAGE, OFFSET_MAX + 1)
 
     df = pd.DataFrame(columns=["Title", "Link", "Description"])
