@@ -1,3 +1,11 @@
+import html
+
+
+def escape_html(text):
+    escaped = html.escape(str(text))
+    return escaped.replace('&lt;mark&gt;', '<mark>').replace('&lt;/mark&gt;', '</mark>')
+
+
 def stylesheet():
     return """
         <style>
@@ -155,13 +163,13 @@ def report_one(diff):
             body += f"""
                 <tr>
                     <td class="pieporter__results_title">
-                        {diff_row['Title']}<br>
-                        <a href="{diff_row['Link']}" target="_blank">{diff_row['Link']}</a>
+                        {escape_html(diff_row['Title'])}<br>
+                        <a href="{html.escape(str(diff_row['Link']), quote=True)}" target="_blank">{html.escape(str(diff_row['Link']))}</a>
                     </td>
                 </tr>
                 <tr>
                     <td class="pieporter__results_description" colspan="2">
-                        <p>{diff_row['Description']}</p>
+                        <p>{escape_html(diff_row['Description'])}</p>
                     </td>
                 </tr>
             """
@@ -186,7 +194,7 @@ def report_one(diff):
         """
 
     body += footer()
-    body = template_end()
+    body += template_end()
 
     return body
 
@@ -198,7 +206,7 @@ def report_all(results_list):
 
     for result in results_list:
         body += f"""
-            <h2 class="pieporter__for">Search query: {result['query']}</h2>
+            <h2 class="pieporter__for">Search query: {html.escape(str(result['query']))}</h2>
         """
         body += """
             <table class="pieporter__results">
@@ -210,13 +218,13 @@ def report_all(results_list):
                 body += f"""
                     <tr>
                         <td class="pieporter__results_title">
-                            {diff_row['Title']}<br>
-                            <a href="{diff_row['Link']}" target="_blank">{diff_row['Link']}</a>
+                            {escape_html(diff_row['Title'])}<br>
+                            <a href="{html.escape(str(diff_row['Link']), quote=True)}" target="_blank">{html.escape(str(diff_row['Link']))}</a>
                         </td>
                     </tr>
                     <tr>
                         <td class="pieporter__results_description" colspan="2">
-                            <p>{diff_row['Description']}</p>
+                            <p>{escape_html(diff_row['Description'])}</p>
                         </td>
                     </tr>
                 """
