@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import smtplib
+import ssl
 import os
 
 load_dotenv()
@@ -40,7 +41,7 @@ def send_email(subject, body, to_email, body_type="plain", attachment_path_list=
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
+        server.starttls(context=ssl.create_default_context())
         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         text = msg.as_string()
         server.sendmail(EMAIL_ADDRESS, to_email, text)

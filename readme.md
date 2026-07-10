@@ -37,21 +37,23 @@ You can configure how many recent results to compare against.<br>
 - ```SMTP_SERVER```: SMTP server address
 - ```SMTP_PORT```: SMTP server port
 
-### Google Search API Settings for ```google_search```
-- ```GOOGLE_SEARCH_ENGINE_ID```: Google Search Engine ID<br> https://programmablesearchengine.google.com/
-- ```GOOGLE_API_KEY```: GCP Custom Search Engine allowed API KEY<br> https://console.cloud.google.com/apis/credentials
+### Brave Search API Settings for ```brave_search```
+- ```BRAVE_API_KEY```: Brave Search API KEY<br> https://api-dashboard.search.brave.com/
+- ```BRAVE_COUNTRY```: (Optional) 2-letter country code for search results (e.g. KR)
+- ```BRAVE_SEARCH_LANG```: (Optional) Language code for search results (e.g. ko)
 - ```ROW_PER_SEARCH```: Number of search results per search
   - Default value is 10, maximum value is 100
-> Google Search API may incur charges. Be careful.
+  - Results are fetched in pages of 20 per API request
+> Brave Search API may incur charges. Be careful.
 
 ### Pie-Porter Settings for ```pieporter```
 - ```SEARCH_QUERY```: Search keywords
-    - You can use Google search operators 
+    - You can use search operators supported by Brave Search
 - ```QUERY_SEPERATOR```: Seperator for multiple search queries
     - Default value is |
 - ```EXCLUDE_SITE```: Exclude site from search results
     - Separate multiple sites with ```QUERY_SEPERATOR```
-    - Adds ```-site:example.com``` to search query
+    - Results whose hostname matches are filtered out (wildcards like ```*.facebook.com``` supported)
 - ```SEARCH_RANGE=```: Search range in days from today
     - Default value is 0, and it means unlimited search range.
 - ```FILE_PREFIX```: Prefix for the CSV file name
@@ -79,9 +81,10 @@ You can configure how many recent results to compare against.<br>
     SMTP_SERVER=@@@
     SMTP_PORT=587
     
-    # google_search
-    GOOGLE_SEARCH_ENGINE_ID=1234567890abcdef
-    GOOGLE_API_KEY=1234567890abcdefghijklmnopqrstuvwxyz-_=
+    # brave_search
+    BRAVE_API_KEY=BSA1234567890abcdefghijklmnopqrstuv
+    BRAVE_COUNTRY=KR
+    BRAVE_SEARCH_LANG=ko
     ROW_PER_SEARCH=2
     
     # pieporter

@@ -6,9 +6,9 @@ import glob
 import datetime
 
 import send_email
-import google_search
+import brave_search
 
-from .templates import report_all
+from .templates import report_all, report_one
 
 load_dotenv()
 
@@ -83,7 +83,7 @@ def send_report(search_query, diff, result_file):
         for diff_index, diff_row in diff.iterrows():
             body += f"{diff_row['Title']}\n{diff_row['Link']}\n{diff_row['Description']}\n\n"
 
-    body = templates.report_one(diff)
+    body = report_one(diff)
 
     send_email.send_email(subject, body, EMAIL_TO, "html", [result_file])
 
@@ -108,9 +108,7 @@ def send_reports_at_once(results_list):
 
 def search():
     SEARCH_QUERY = os.environ.get("SEARCH_QUERY")
-    QUERY_SEPERATOR = os.environ.get("QUERY_SEPERATOR")
-    EXCLUDE_SITE = os.environ.get("EXCLUDE_SITE")
-    SEARCH_RANGE = int(os.environ.get("SEARCH_RANGE") or 0)
+    QUERY_SEPERATOR = os.environ.get("QUERY_SEPERATOR") or "|"
     ROW_PER_SEARCH = min([int(os.environ.get("ROW_PER_SEARCH") or 10), 100])
     SEND_REPORT_EACH = bool(os.environ.get("SEND_REPORT_EACH"))
     COMPARE_RECENT_N = int(os.environ.get("COMPARE_RECENT_N") or 1)
@@ -120,20 +118,7 @@ def search():
     results_list = []
 
     for search_query in search_query_list:
-        query = search_query
-        query += " -filetype:pdf"
-
-        if EXCLUDE_SITE:
-            exclude_site_list = EXCLUDE_SITE.split(QUERY_SEPERATOR)
-            for exclude_site in exclude_site_list:
-                query += f" -site:{exclude_site}"
-
-        if SEARCH_RANGE > 0:
-            end_date = datetime.datetime.now()
-            start_date = end_date - datetime.timedelta(days=SEARCH_RANGE)
-            query += f" after:{start_date.strftime('%Y-%m-%d')}"
-
-        df = google_search.search(query, ROW_PER_SEARCH, search_query)
+        df = brave_search.search(search_query, ROW_PER_SEARCH, search_query)
         diff = compare_dataframes(get_recent_result(search_query, COMPARE_RECENT_N), df)
 
         result_file = save_to_csv(search_query, df)
